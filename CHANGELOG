@@ -1,0 +1,124 @@
+#### 1.4.0 2024.08.16
+* Add GitHub Actions automation
+
+#### 1.3.8 2024.08.12
+* Misc bugfixes
+
+#### 1.3.7 2024.07.29
+* Misc bugfixes
+
+#### 1.3.6 2024.07.10
+* Force samtools split to open required no. of files, use default params instead of dummy files.
+* Mitigate wiz alert for batch job definition in drugseq aws account, fix environment in notification email.
+
+#### 1.3.5 2024.07.03
+* Refactors pipeline to adopt community best practices for pipeline organization and parameters validation
+* Outputs a new file mrk_dependent_software_versions.yml with the versions of all tools and packages used
+* Refactors downsampling logic to improve clarity, flexibility, and speed
+* Various bugfixes
+
+#### 1.3.4 2024.06.20
+* Fix bug where wells are downsampled to nearly 0
+
+#### 1.3.3 2024.06.11
+* replace exact downsampling with probabilistic
+
+#### 1.3.2 2024.06.06
+* Fix crash with bad data type inference for violin
+* Propagate user email parameter to GED
+* Fix Too many indexers error
+
+#### 1.3.1 2024.05.21
+* Add functionality to downsample wells that have too many reads prior to alignment
+* Update DRAGoNreport and STARsoloReport files with more descriptive headers and additional statistics
+* Correct inaccurate % loss statistics in DRAGoNreport, STARsoloReport
+
+#### 1.3.0 2024.05.16
+* Produce plate_heatmap.png output file
+* Add REQUIRED parameter --ISID for use with the AWS profile
+* Various bugfixes
+
+#### 1.2.4 2024.04.03
+* Hard fail pipeline on data quality issues when `--Demux.data_quality_errors = raise`
+
+#### 1.2.3 2024.03.26
+* Add demux.json `plate_map` field for diagnostic purposes.
+
+#### 1.2.2 2024.02.09
+* `--workflowMode single` is deprecated
+* Improve readout from demultiplexed counts QC report
+
+#### 1.2.1 2023.12.06
+* Increase threshold for "excessive read counts"
+
+#### 1.2.0 2023.11.01
+* Add data quality checkpoint
+
+#### 1.1.3 2023.08.17
+* Catch up on manual change log
+* Add TPM and FPKM output
+* Onboard KSeq++, BAMtools, Eigen3 instead of custom adaptors
+* Delete zstr
+* Correct Rescue formula
+* Use standard C++23
+* Handle more cases of malformed metadata
+
+#### 1.1.2 2023.02.23
+* Implement unit tests
+* Rework mix-and-match profile configurations
+* Remove dead code
+* Checkout zstr as a submodule
+* Add Jenkins job to execute unit tests
+
+#### 1.1.1
+* Port processes Demultiplex, SplitBAM, and Deduplicate to C++
+* Remove BED output
+
+#### 1.1.0
+* Strengthen duplicate detection using updated criteria
+* Conditionally swap order of STAR and SplitBAM processes based on whether two-pass mode is requested
+* Augmented reporting of UMIs in the BED file
+* Subject noBC reads to featureCounts and CollapseMultimappers
+* Support launching from the stash bitbucket server
+* Fix EM multimapper resolution strategy
+* Minor fixes and tweaks
+
+#### 1.0.0
+* Added BED output for UMI-level introspection
+* Spawn only a single STAR job instead of --Demux.split
+* Add descriptive tags to processes for ease of tracking when running in background
+* Remove --IO.tmpdir
+* Changed default for --Demux.mismatch to 1
+* Added check for unique well names
+* Barcode distance check now tests for up to 2 * Demux.mismatch, and errors if observed. Resolves issue processing PID22680.
+
+#### 1.0.0rc3
+* Accepts BCL as input
+* Simplified --IO.R1, --IO.R2 to --IO.fastqdir, --IO.sampleName
+* Various bugfixes
+* Restored support for nextflow version 21.04.3 Renamed DRAGoN{/main=>}.nf, STARsolo{/main=>}.nf. Moved accessory scripts to common bin/.
+
+#### 1.0.0rc2
+* Added additional barcode sanity checks to Preprocessing.Demultiplex
+* Merge intermediate BAM files at the end, for downstream debugging
+* Various bugfixes
+
+#### 1.0.0rc1
+* `scripts/parse_metadata.py` properly handles metadata files with unallocated wells.
+* Separated the STARsolo and DRAGoN workflows. Removed top-level main.nf. THIS IS A BREAKING CHANGE!
+* Changed --Dedup.ambiguous [None->Unique]. THIS IS A BREAKING CHANGE!
+* Refactored to utilize moduleBinaries feature from nextflow 22.10 to allow standalone execution of python scripts. Minimum required version of nextflow is therefore 22.10. THIS IS A BREAKING CHANGE!
+* Updated awsbatch profiles
+* Renamed profiles. merck_ctc -> ctc_hpc_sge, merck_aws -> {ctc_hpc_awsbatch,ssngsi_awsbatch_06_1q}. THIS IS A BREAKING CHANGE!
+* If --IO.star directory doesn't exist or is empty, builds genome indices on-the-fly (requires --IO.fasta and --IO.gtf).
+
+#### 1.0.0b2
+* Removed scripts for running legacy pipelines
+* Added `scripts/parse_metadata.py` to simplify the creation of `barcodes.txt`, `params.yml`, and the output directory.
+* Multimapped reads tracker now holds its memory across chromosomes within a barcode, allowing for greater accuracy when using a multimap handler.
+* Uniform and PropUnique handlers tested and verified.
+* User may now select multiple multimap handlers for the same run of both STARsolo and DRAGoN. The "None" handler will always be selected.
+* Renamed workflow script from `STARsolo.nf` to `main.nf`.
+
+#### 1.0.0b1
+* Initial implementation of DRAGoN, together with STARsolo, as a nextflow pipeline.

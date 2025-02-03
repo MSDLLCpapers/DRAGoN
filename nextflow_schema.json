@@ -1,0 +1,539 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/MSDLLCPapers/DRAGoN/master/nextflow_schema.json",
+    "title": "MSDLLCPapers/DRAGoN pipeline parameters",
+    "description": "DRAGoN workflow",
+    "type": "object",
+    "$defs": {
+        "input_output_options": {
+            "type": "object",
+            "title": "Input/Output options",
+            "properties": {
+                "IO": {
+                    "type": "object",
+                    "required": [
+                        "fastqdir",
+                        "metadata",
+                        "outdir"
+                    ],
+                    "dependentRequired": {
+                        "bcldir": ["sampleSheet"]
+                    },
+                    "allOf": [
+                        {
+                            "anyOf": [
+                                {
+                                    "required": ["reference"]
+                                },
+                                {
+                                    "required": ["star"],
+                                    "star": {
+                                        "exists": true
+                                    }
+                                },
+                                {
+                                    "required": ["star", "fasta", "gtf"]
+                                }
+                            ]
+                        },
+                        {
+                            "anyOf": [
+                                {
+                                    "required": ["bcldir", "sampleSheet"]
+                                },
+                                {
+                                    "fastqdir": {
+                                        "exists": true
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "properties": {
+                        "fastqdir": {
+                            "type": "string",
+                            "format": "directory-path",
+                            "description": "Path containing fastq files. Can be an empty or nonexistent directory, in which case these will be generated."
+                        },
+                        "bcldir": {
+                            "type": "string",
+                            "format": "directory-path",
+                            "exists": true,
+                            "description": "Path to raw base calls off the sequencer. Required if --IO.fastqdir is an empty or nonexistent directory."
+                        },
+                        "sampleSheet": {
+                            "type": "string",
+                            "format": "file-path",
+                            "pattern": "^\\S+\\.csv$",
+                            "exists": true,
+                            "description": "Path to sample sheet defining sample names and I5/I7 indices for use with bcl2fastq. Required if --IO.fastqdir is an empty or nonexistent directory."
+                        },
+                        "reference": {
+                            "type": "string",
+                            "description": "Name of a reference genome for building STAR indices. Soft required if --IO.star is an empty or nonexistent directory. Hard required if --IO.star is missing."
+                        },
+                        "star": {
+                            "type": "string",
+                            "format": "directory-path",
+                            "description": "Path to STAR genome indices for the target species. Can be an empty or nonexistent directory, in which case these will be generated. If omitted, --IO.reference is required."
+                        },
+                        "gtf": {
+                            "type": "string",
+                            "format": "file-path",
+                            "pattern": "^\\S+\\.gtf(\\.gz)?$",
+                            "exists": true,
+                            "description": "Path to gene annotation GTF file for building STAR indices. Required if --IO.star is an empty or nonexistent directory and --IO.reference is not provided."
+                        },
+                        "fasta": {
+                            "type": "string",
+                            "format": "file-path",
+                            "pattern": "^\\S+\\.(fa|fna|fasta)(\\.gz)?$",
+                            "exists": true,
+                            "description": "Path to genome sequence fasta file for building STAR indices. Required if --IO.star is an empty or nonexistent directory and --IO.reference is not provided."
+                        },
+                        "contaminant": {
+                            "type": "string",
+                            "format": "directory-path",
+                            "exists": true,
+                            "description": "A STAR (versionGenome == 2.7.4a) index of a contaminant genome reference (rRNA, ncRNA, adapter sequences, etc.). If supplied, removes reads that align to the contaminant genome from further consideration. Such reads will be marked with flag 0x800 (SUPPLEMENTARY)."
+                        },
+                        "metadata": {
+                            "type": "string",
+                            "format": "file-path",
+                            "pattern": "^\\S+\\.xlsx$",
+                            "exists": true,
+                            "description": "Path to Excel spreadsheet defining the experiment metadata"
+                        },
+                        "barcodes": {
+                            "type": "string",
+                            "format": "file-path",
+                            "pattern": "^\\S+\\.txt$",
+                            "exists": true,
+                            "description": "Path to tab-separated text file defining barcode sequences and well names. This file should have no header row. The first column contains the barcode sequence, and the second column contains the name of the well. All other columns are ignored. Required if --IO.metadata is omitted."
+                        },
+                        "sampleName": {
+                            "type": "string",
+                            "description": "Prefix of fastq filenames within --IO.fastqdir to process. For example, `--IO.sampleName Sample1` will select all files matching `path/to/fastq/Sample1_*.fastq.gz`. Specify multiple prefixes using a quoted list. Required if --IO.metadata is omitted."
+                        },
+                        "outdir": {
+                            "type": "string",
+                            "format": "directory-path",
+                            "description": "Path to store the analysis outputs. Will be created if it does not already exist. Previous analyses in this directory will be overwritten."
+                        },
+                        "keep_bam": {
+                            "type": "string",
+                            "description": "If set, a BAM file is included in the output."
+                        },
+                        "phred": {
+                            "type": "string",
+                            "description": "Phred quality score offset",
+                            "enum": ["33", "64"],
+                            "default": "33"
+                        },
+                        "no_prestage_index": {
+                            "type": "boolean",
+                            "description": "When running locally with locally-mounted STAR index, disable copying it to the workdir"
+                        }
+                    }
+                }
+            }
+        },
+        "demultiplex_options": {
+            "type": "object",
+            "title": "Options for QC and well demultiplexing",
+            "properties": {
+                "Demux": {
+                    "type": "object",
+                    "properties": {
+                        "dmuxn": {
+                            "type": "integer",
+                            "description": "Split input fastq into chunks of this size (0: no chunking)",
+                            "default": 0
+                        },
+                        "split": {
+                            "type": "integer",
+                            "description": "Subdivide the subsequent tasks into at most this many parallel jobs. Reads will be grouped by barcode, and barcodes will be assorted into downstream tasks in order to distribute the workload as evenly as possible. Depending on the plate layout, this can still result in unbalanced workloads. If 0, each well gets its own downstream task.",
+                            "default": 0
+                        },
+                        "umilen": {
+                            "type": "integer",
+                            "description": "Length of the UMI portion of the R1 read. For an experiment with well barcodes of length B, the UMI begins at position B+1.",
+                            "default": 10
+                        },
+                        "mismatch": {
+                            "type": "integer",
+                            "description": "Maximum number of mismatches (substitutions) allowed in the barcode sequence. If 0, only reads whose barcodes exactly match the predefined barcode sequence for a given well will be assorted to that well. Increasing this figure lets you capture more reads per well at the cost of some added noise. Setting this too high will cause an error.",
+                            "default": 1
+                        },
+                        "bcNcountMax": {
+                            "type": "integer",
+                            "description": "Maximum number of base calls in the barcode sequence that are allowed to be N. Defaults to --Demux.mismatch."
+                        },
+                        "minQuality": {
+                            "type": "integer",
+                            "description": "Base call quality threshold for up-front UMI filtering and cDNA base trimming.",
+                            "default": 20
+                        },
+                        "minUmiQualBases": {
+                            "type": "integer",
+                            "description": "Minimum number of bases in the UMI portion of R1 whose quality scores must meet or exceed --Demux.minQuality.",
+                            "default": 6
+                        },
+                        "maxATcontent": {
+                            "type": "number",
+                            "description": "Maximum fraction of bases in the cDNA (R2) read allowed to be A or T. Reads that exceed this are discarded.",
+                            "default": 0.9
+                        },
+                        "maxGCcontent": {
+                            "type": "number",
+                            "description": "Maximum fraction of bases in the cDNA (R2) read allowed to be G or C. Reads that exceed this are discarded.",
+                            "default": 0.9
+                        },
+                        "minLength": {
+                            "type": "integer",
+                            "description": "Minimum allowed length of the cDNA (R2) read before or after trimming. Reads that do not meet this are discarded.",
+                            "default": 20
+                        },
+                        "homoPolymer": {
+                            "type": "integer",
+                            "description": "Define a homopolymer to be a run of at least this many of the same base in the cDNA (R2) read. If one is found, the read is trimmed from the start of the homopolymer to the 3' end of the read.",
+                            "default": 10
+                        },
+                        "maxHomoMmatch": {
+                            "type": "integer",
+                            "description": "Maximum number of bases in a suspected homopolymer which are allowed to vary from that base. If set to 1 or higher, there can be a significant performance impact.",
+                            "default": 0
+                        },
+                        "adapter": {
+                            "type": "string",
+                            "description": "PCR/sequencing adapter to trim from the 3' end of R2 reads",
+                            "pattern": "^[ACGT]+$",
+                            "default": "CTGTCTCTTATA"
+                        },
+                        "data_quality_errors": {
+                            "type": "string",
+                            "description": "Governs how the pipeline should handle wells with low quality.\nraise (default): Aborts the pipeline on error\nwarn: Emits a warning to stderr\nignore: Don't run heuristics",
+                            "enum": [
+                                "ignore",
+                                "warn",
+                                "raise"
+                            ],
+                            "default": "raise"
+                        },
+                        "downsample_to": {
+                            "type": "string",
+                            "description": "Determine the threshold number of QC-pass reads above which a well will be downsampled. If a decimal between 0 and 1, the threshold is that fraction of the total QC-pass reads in the experiment. If no value is provided, the threshold will be determined adaptively as the lower of 15% of the total number of reads in the experiment, or the expression `floor(pct75+1.75*IQR)`, where pct75 is the 75th percentile of reads assigned to wells and IQR is the difference between the 25th and 75th percentiles. Default: no downsampling.",
+                            "help_text": "NOTE: If a number is provided, it must be positive (elsewise is an error). Also, if this is set but --Demux.downsample_threshold is not, this implicitly sets --Demux.downsample_threshold with the same value.",
+                            "pattern": "^[0-9]*(?:\\.[0-9]+)?$"
+                        },
+                        "downsample_threshold": {
+                            "type": "string",
+                            "description": "Downsample wells to a maximum of N reads. If a decimal between 0 and 1, will downsample to that fraction regardless of original size. If not provided, will choose the threshold given by --Demux.downsample_threshold. Default: no downsampling.",
+                            "help_text": "NOTE: If a number is provided, it must be positive (elsewise is an error). Also, if this is set but --Demux.downsample_to is not, this implicitly sets --Demux.downsample_to with the same value",
+                            "pattern": "^[0-9]*(?:\\.[0-9]+)?$"
+                        },
+                        "downsample_seed": {
+                            "type": "integer",
+                            "description": "Set a seed for the downsampling logic, for the sake of reproducibility. Default: random seed"
+                        },
+                        "plate_layout_xoff": {
+                            "type": "integer",
+                            "hidden": true,
+                            "deprecated": true
+                        },
+                        "plate_layout_yoff": {
+                            "type": "integer",
+                            "hidden": true,
+                            "deprecated": true
+                        }
+                    }
+                }
+            }
+        },
+        "alignment_options": {
+            "type": "object",
+            "title": "Options for genome alignment",
+            "properties": {
+                "Align": {
+                    "type": "object",
+                    "properties": {
+                        "outFilterMultimapNmax": {
+                            "type": "integer",
+                            "description": "Discard reads with more than this many valid alignments to the genome",
+                            "default": 20
+                        },
+                        "outFilterMatchNmin": {
+                            "type": "integer",
+                            "description": "Discard alignments with fewer than this many bases matching the reference",
+                            "default": 20
+                        },
+                        "outFilterMultimapScoreRange": {
+                            "type": "integer",
+                            "description": "Discard secondary alignments whose scores are more than this far away from the best alignment for that read",
+                            "default": 1
+                        },
+                        "alignIntronMin": {
+                            "type": "integer",
+                            "description": "Minimum number of intron bases to map the read",
+                            "default": 1
+                        },
+                        "alignIntronMax": {
+                            "type": "integer",
+                            "description": "Maximum number of intron bases to map the read",
+                            "default": 1
+                        },
+                        "clip5pNbases": {
+                            "type": "integer",
+                            "description": "Clip this many bases from the 5' end of reads",
+                            "default": 0
+                        },
+                        "clip3pNbases": {
+                            "type": "integer",
+                            "description": "Clip this many bases from the 3' end of reads",
+                            "default": 0
+                        },
+                        "outFilterMismatchNoverLmax": {
+                            "type": "number",
+                            "description": "Discard alignments with more than this fraction of mismatched bases",
+                            "default": 0.1
+                        },
+                        "twopassMode": {
+                            "type": "string",
+                            "description": "Whether to run STAR in single-pass (default) or Basic two-pass mode",
+                            "enum": [
+                                "None",
+                                "Basic"
+                            ],
+                            "default": "None"
+                        },
+                        "extraOptions": {
+                            "type": "string",
+                            "description": "A quoted string of extra flags to pass to STAR. Use this for options not enumerated above."
+                        },
+                        "MEM": {
+                            "type": "string",
+                            "description": "Amount of memory to reserve per CPU when running alignment processes. Interpreted as a number of bytes, or you can add a memory suffix e.g. 8GB. (def. 20GB; recommend increasing it for larger genomes)",
+                            "pattern": "^[0-9]+( ?[kMG]?B?)?$",
+                            "default": "64GB"
+                        }
+                    }
+                }
+            }
+        },
+        "counting_options": {
+            "type": "object",
+            "title": "Options for feature annotation",
+            "properties": {
+                "Count": {
+                    "type": "object",
+                    "properties": {
+                        "fracOverlap": {
+                            "type": "number",
+                            "description": "Minimum fraction of overlapping bases in a read that is required for read assignment. Value should be within range [0,1]. 0 by default. Number of overlapping bases is counted from both reads if paired end. Both this option and '--minOverlap' option need to be satisfied for read assignment.",
+                            "default": 0
+                        },
+                        "strandness": {
+                            "type": "integer",
+                            "description": "Denote whether reads are unstranded (0, def.), forward-strand (1) or reverse-strand (2) specific.",
+                            "minimum": 0,
+                            "maximum": 2,
+                            "default": 0
+                        },
+                        "extraOptions": {
+                            "type": "string",
+                            "description": "A quoted string of extra flags to pass to featureCounts."
+                        },
+                        "adjust_effective_lengths": {
+                            "type": "boolean",
+                            "description": "If set, when normalizing counts, the gene or transcript length will be adjusted by the average read (fragment) length for each sample as part of the calculation."
+                        },
+                        "MEM": {
+                            "type": "string",
+                            "description": "Amount of memory to reserve per CPU when running alignment processes. Interpreted as a number of bytes, or you can add a memory suffix e.g. 8GB. (def. 8GB)",
+                            "pattern": "^[0-9]+( ?[kMG]?B?)?$",
+                            "default": "8GB"
+                        }
+                    }
+                }
+            }
+        },
+        "deduplication_options": {
+            "type": "object",
+            "title": "Options for duplicate detection",
+            "properties": {
+                "Dedup": {
+                    "type": "object",
+                    "properties": {
+                        "umi_mismatch": {
+                            "type": "integer",
+                            "description": "Maximum edit distance between two UMIs to consider them duplicates.",
+                            "default": 2
+                        },
+                        "umiDist": {
+                            "type": "integer",
+                            "description": "Search for duplicates within a sliding genomic window of this many bases.",
+                            "default": 10
+                        },
+                        "ambiguous": {
+                            "type": "string",
+                            "description": "Comma-separated list of strategies for handling multimapping reads. Accepted values are:\nUnique: Only count reads assigned to a single gene.\nUniform: Distribute each multimapping read's count uniformly across all genes they map to.\nPropUnique: Attempt to distribute multimapping reads proportional to the number of reads mapping uniquely to each gene. Falls back on Uniform.\nEM: Computes the maximum likelihood distribution of multimapping reads using an expectation-maximization algorithm.\nRescue: Equivalent to running a single iteration of EM.",
+                            "pattern": "^(Unique|Uniform|PropUnique|EM|Rescue)(,(Unique|Uniform|PropUnique|EM|Rescue))*$",
+                            "default": "Unique"
+                        },
+                        "em_iter_max": {
+                            "type": "integer",
+                            "description": "DRAGoN only: If --Dedup.ambiguous contains EM, the maximum number of iterations of EM",
+                            "default": 100
+                        },
+                        "em_max_diff": {
+                            "type": "number",
+                            "description": "DRAGoN only: If --Dedup.ambiguous contains EM, the tolerance for convergence, measured by the largest absolute change in counts for any gene in the current well",
+                            "default": 0.01
+                        },
+                        "em_small_thresh": {
+                            "type": "number",
+                            "description": "DRAGoN only: If --Dedup.ambiguous contains EM, clamp counts smaller than this to 0",
+                            "default": 0.01
+                        },
+                        "debug": {
+                            "type": "boolean",
+                            "hidden": true
+                        }
+                    }
+                }
+            }
+        },
+        "uncategorized_options": {
+            "type": "object",
+            "properties": {
+                "private": {
+                    "type": "object",
+                    "properties": {
+                        "versionGenome": {
+                            "type": "string",
+                            "hidden": true,
+                            "default": "2.7.4a"
+                        },
+                        "overhang": {
+                            "type": "integer",
+                            "hidden": true,
+                            "default": 89
+                        }
+                    }
+                },
+                "igenomes_base": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "Directory / URL base for iGenomes references.",
+                    "default": "s3://ngi-igenomes/igenomes/",
+                    "fa_icon": "fas fa-cloud-download-alt",
+                    "hidden": true
+                },
+                "igenomes_ignore": {
+                    "type": "boolean",
+                    "description": "Do not load the iGenomes reference config.",
+                    "fa_icon": "fas fa-ban",
+                    "hidden": true,
+                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
+                },
+                "awsbatch_queue": {
+                    "type": "string",
+                    "description": "awsbatch queue to submit jobs to",
+                    "pattern": "^\\S+$"
+                },
+                "awsbatch_jobrole": {
+                    "type": "string",
+                    "description": "IAM role to use for awsbatch worker instances",
+                    "pattern": "^\\S+$"
+                },
+                "implementation": {
+                    "type": "string",
+                    "hidden": true,
+                    "enum": ["C++", "Python"],
+                    "default": "C++"
+                },
+                "errorStrategy": {
+                    "type": "string",
+                    "description": "If a worker hits an error after two attempts, the workflow should either\n    continue to \"retry\",\n    allow all running tasks to \"finish\" before exiting (default), or\n    \"terminate\" the workflow immediately.",
+                    "enum": ["finish", "terminate", "retry"],
+                    "default": "finish"
+                },
+                "maxRetries": {
+                    "type": "integer",
+                    "description": "If --errorStrategy retry, the maximum number of times the task will be retried before the workflow terminates.",
+                    "default": 3
+                },
+                "MINMEM": {
+                    "type": "string",
+                    "description": "Minimum amount of memory to reserve for any given job. Applies globally.",
+                    "pattern": "^[0-9]+( ?[kMG]?B?)?$",
+                    "default": "2GB"
+                },
+                "MAXMEM": {
+                    "type": "string",
+                    "description": "Maximum amount of memory to reserve for any given job. Applies globally.",
+                    "pattern": "^[0-9]+( ?[kMG]?B?)?$",
+                    "default": "4GB"
+                },
+                "MAXCPU": {
+                    "type": "integer",
+                    "description": "Maximum number of CPUs to reserve for any given job. Applies globally.",
+                    "default": 2
+                },
+                "PLATE_LAYOUT": {
+                    "type": "string",
+                    "description": "For MergeDemuxJSON, a CSV file representing the plate well barcodes in a grid layout.",
+                    "format": "file-path",
+                    "pattern": "^\\S+\\.csv$",
+                    "exists": true,
+                    "default": "assets/layout_384.csv"
+                },
+                "pipeline": {
+                    "type": "string",
+                    "hidden": true,
+                    "enum": ["DRAGoN", "STARsolo"],
+                    "default": "DRAGoN"
+                },
+                "docker_repo": {
+                    "type": "string",
+                    "hidden": true,
+                    "default": "quay.io"
+                },
+                "docker_container": {
+                    "type": "string",
+                    "hidden": true,
+                    "default": "MSDLLCPapers/DRAGoN:1.6.1"
+                },
+                "in_nf_test": {
+                    "type": "boolean",
+                    "hidden": true
+                },
+                "notifyEmails": {
+                    "type": "string",
+                    "description": "Comma-separated list of emails to notify on workflow completion.",
+                    "pattern": "^\\S+@\\S+(,\\S+@\\S+)*$"
+                }
+            }
+        }
+    },
+    "allOf": [
+        {
+            "$ref": "#/$defs/input_output_options"
+        },
+        {
+            "$ref": "#/$defs/demultiplex_options"
+        },
+        {
+            "$ref": "#/$defs/alignment_options"
+        },
+        {
+            "$ref": "#/$defs/counting_options"
+        },
+        {
+            "$ref": "#/$defs/deduplication_options"
+        },
+        {
+            "$ref": "#/$defs/uncategorized_options"
+        }
+    ]
+}

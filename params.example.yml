@@ -1,0 +1,78 @@
+# Parameters file for STARsolo or DRAGoN
+
+# Parameters controlling file paths
+IO:
+  fastqdir: # REQUIRED: path to directory containing fastq files
+  sampleName: # REQUIRED: regex prefix corresponding to fastq files for the plate currently being assessed
+  bcldir: # Path to raw sequencer output. Required if fastq files need to be made.
+  sampleSheet: # Path to bcl2fastq sample sheet. Required if fastq files need to be made.
+  reference: # REQUIRED: igenome lookup key
+  star: # REQUIRED if --IO.reference not passed: path to directory containing host genome indices
+        # (STAR genome version 2.7.4a, should be built using the same --sjdbGTFfile as above, and a value of --sjdbOverhang appropriate for your experiment)
+        # Passed to `STAR --genomeDir`.
+  fasta: # full path of genome fasta file for building STAR indices as needed
+  gtf: # full path of transcripts annotation GTF file for building STAR indices as needed
+  barcodes: # REQUIRED: path to TSV describing barcodes/wells (minimum 2 columns)
+  contaminant: # optional: path to directory containing contaminant genome indices
+               # (STAR genome version 2.7.4a, optionally built with an --sjdbGTFfile for the contaminant species, and a value of --sjdbOverhang appropriate for your experiment)
+  outdir: # REQUIRED: path to save output files
+
+# Parameters for controlling filters and demultiplexing
+Demux:
+  dmuxn: 0 # Chunk size for demultiplexing, in number of read pairs (0: disable chunking)
+           # If this step is timing out, consider setting it to something reasonable, i.e.
+           # 50 million. Reduce as needed until it stops timing out.
+           # Each chunk is one Demultiplex job. If chunking is disabled, spawns one
+           # Demultiplex job for each fastq file pair.
+  split: 0 # Group barcodes into at most this many STAR jobs.
+           # (default: one job per barcode; noBC is always a separate job if IO.keep is yes)
+  umilen: 10 # Length of the UMI. The implicit design of the R1 sequence has UMI starting
+             # immediately after the barcode sequence, with the barcode sequence starting at
+             # base position 0.
+  mismatch: 2 # Maximum number of mismatches between sequenced barcode and design barcode.
+              # The demultiplex process will verify that your design is complex enough
+              # to support this argument setting, otherwise you may need to lower it.
+  minLength: 20 # Minimum cDNA length to accept the read (after adaptor and quality trimming).
+  minQuality: 20 # Minimum phred quality score to consider a base call as sufficient quality.
+  minUmiQualBases: 6 # Minimum number of UMI bases that must meet or exceed minQuality.
+  maxATcontent: 0.9 # Float maximum fraction of cDNA bases allowed to be A/T for QC pass.
+  maxGCcontent: 0.9 # Float maximum fraction of cDNA bases allowed to be G/C for QC pass.
+  homoPolymer: 10 # If a homopolymer (run of bases consisting of a single base)
+                  # of at least this length is encountered, it and all downstream
+                  # bases are removed. Set less than 5 to disable.
+  maxHomoMmatch: 0 # Allow at most this many bases to differ from homopolymer to
+                   # trigger removal.
+  bcNcountMax: # Maximum number of N bases allowed in a barcode. If a barcode has more Ns
+               # than this, the read is counted as noBC.
+
+# Parameters for controlling the mapping step
+Align:  # Forwarded to STAR, see the STAR manual for details
+  outFilterMultimapNmax: 20
+  outFilterMatchNmin: 20
+  outFilterMultimapScoreRange: 1
+  alignIntronMin: 1
+  alignIntronMax: 1
+  clip5pNbases: 0
+  clip3pNbases: 0
+  outFilterMismatchNoverLmax: 0.1
+  twopassMode: None
+  extraOptions: ""
+
+# Parameters for controlling the gene assignment step
+Count:  # Forwarded to featureCounts, see the subread manual for details
+  fracOverlap: 0
+  strandness: 1
+  extraOptions: ""
+
+# Parameters for controlling the deduplication and counting step
+Dedup:
+  umi_mismatch: 2 # Maximum edit distance between two UMIs to collapse them into one.
+                  # This includes substitutions and indels.
+  umiDist: 10 # Size of the sliding window within a gene locus to consider
+              # two UMIs to be the same. Uses genomic coordinates without
+              # regard to splice junctions.
+  ambiguous: Unique # Strategy for distributing multi-mapping UMIs across
+                    # the genes they were assigned to.
+                    # Options: Unique, Uniform, PropUnique, EM, Rescue.
+                    # Behavior in DRAGoN is specified to mimic STARsolo.
+

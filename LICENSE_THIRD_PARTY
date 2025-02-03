@@ -1,0 +1,128 @@
+DRAGoN uses third-party software, headers, and libraries which may be distributed under different
+licenses. We have attempted to list all of these third party libraries and
+their licenses below.
+
+Apache Software License, Version 2.0 (http://opensource.org/licenses/apache2.0)
+  * aioboto3: https://github.com/terricain/aioboto3
+  * aiobotocore: https://github.com/aio-libs/aiobotocore
+  * nextflow: https://nextflow.io
+  * regex: https://github.com/mrabarnett/mrab-regex
+  * simplejson: https://github.com/simplejson/simplejson
+  * unicodedata2: http://github.com/fonttools/unicodedata2
+  * aiohttp: https://github.com/aio-libs/aiohttp
+  * aiosignal: https://github.com/aio-libs/aiosignal
+  * async-timeout: https://github.com/aio-libs/async-timeout
+  * boto3: https://github.com/boto/boto3
+  * botocore: https://github.com/boto/botocore
+  * frozenlist: https://github.com/aio-libs/frozenlist
+  * importlib_metadata: https://github.com/python/importlib_metadata
+  * multidict: https://github.com/aio-libs/multidict
+  * requests: https://requests.readthedocs.io
+  * s3transfer: https://github.com/boto/s3transfer
+  * tornado: http://www.tornadoweb.org/
+  * tzdata: https://github.com/python/tzdata
+  * yarl: https://github.com/aio-libs/yarl
+  * cryptography: https://github.com/pyca/cryptography
+  * packaging: https://github.com/pypa/packaging
+  * python-dateutil: https://github.com/dateutil/dateutil
+
+BioPython License (see NOTE 1)
+  * BioPython: https://github.com/biopython/biopython
+
+BSD License (http://www.opensource.org/licenses/BSD-3-Clause)
+  * cpp-lru-cache: https://github.com/lamerman/cpp-lru-cache
+  * numpy: https://numpy.org
+  * pandas: https://pandas.pydata.org/
+  * scipy: https://scipy.org/
+  * seaborn: https://github.com/mwaskom/seaborn
+  * PySocks: https://github.com/Anorov/PySocks
+  * ply: http://www.dabeaz.com/ply/
+  * Jinja2: https://palletsprojects.com/p/jinja/
+  * Markdown: https://Python-Markdown.github.io/
+  * MarkupSafe: https://palletsprojects.com/p/markupsafe/
+  * Miniforge3: https://github.com/conda-forge/miniforge
+  * Pygments: https://pygments.org
+  * click: https://palletsprojects.com/p/click/
+  * colormath: https://github.com/gtaylor/python-colormath
+  * contourpy: https://github.com/contourpy/contourpy
+  * cycler: https://matplotlib.org/cycler/
+  * idna: https://github.com/kjd/idna
+  * kiwisolver: https://github.com/nucleic/kiwi
+  * networkx: https://networkx.org/
+  * patsy: https://github.com/pydata/patsy
+  * pycparser: https://github.com/eliben/pycparser
+  * statsmodels: https://www.statsmodels.org/
+  * wrapt: https://github.com/GrahamDumpleton/wrapt
+  * zstandard: https://github.com/indygreg/python-zstandard
+
+GNU General Public License version 3.0 (https://opensource.org/license/GPL-3.0)
+  * FastQC: https://github.com/s-andrews/FastQC
+  * MultiQC: https://multiqc.info/
+  * subread: https://subread.sourceforge.net/
+  * PyQt5: https://www.riverbankcomputing.com/software/pyqt/
+
+Historical Permission Notice and Disclaimer (HPND) (https://opensource.org/license/historical-php)
+  * Pillow: https://python-pillow.org
+
+MIT License (https://opensource.org/license/mit)
+  * adjustText: https://github.com/Phlya/adjustText
+  * bamtools: https://github.com/pezmaster31/bamtools
+  * boost: https://boost.org
+  * cutadapt: https://github.com/marcelm/cutadapt
+  * kseq++: https://github.com/cartoonist/kseqpp
+  * nf-core, components: https://nf-co.re
+  * nlohmann_json: https://json.nlohmann.me/home/license/
+  * openpyxl: https://openpyxl.readthedocs.io/en/stable/
+  * pysam: https://github.com/pysam-developers/pysam
+  * samtools: https://github.com/samtools/samtools
+  * STAR: https://github.com/alexdobin/STAR
+  * Brotli: https://github.com/google/brotli
+  * PyYAML: https://pyyaml.org/
+  * aioitertools: https://aioitertools.omnilib.dev
+  * attrs: https://www.attrs.org/en/stable/changelog.html
+  * cffi: http://cffi.readthedocs.org
+  * charset-normalizer: https://github.com/Ousret/charset_normalizer
+  * coloredlogs: https://coloredlogs.readthedocs.io
+  * dnaio: https://dnaio.readthedocs.io/
+  * et-xmlfile: https://foss.heptapod.net/openpyxl/et_xmlfile
+  * fonttools: http://github.com/fonttools/fonttools
+  * future: https://python-future.org
+  * humanfriendly: https://humanfriendly.readthedocs.io
+  * humanize: https://github.com/python-humanize/humanize
+  * jmespath: https://github.com/jmespath/jmespath.py
+  * lzstring: https://github.com/gkovacs/lz-string-python
+  * markdown-it-py: https://github.com/executablebooks/markdown-it-py
+  * mdurl: https://github.com/executablebooks/mdurl
+  * pyaml-env: https://github.com/mkaranasou/pyaml_env
+  * pyparsing: https://github.com/pyparsing/pyparsing/
+  * pytz: http://pythonhosted.org/pytz
+  * rich: https://github.com/Textualize/rich
+  * rich-click: https://github.com/ewels/rich-click
+  * six: https://github.com/benjaminp/six
+  * spectra: http://github.com/jsvine/spectra
+  * toml: https://github.com/uiri/toml
+  * types-aiobotocore-s3: https://github.com/youtype/mypy_boto3_builder
+  * urllib3: https://urllib3.readthedocs.io/
+  * xopen: https://github.com/pycompression/xopen/
+  * zipp: https://github.com/jaraco/zipp
+
+Illumina bcl2fastq2 EULA (https://support.illumina.com/content/dam/illumina-support/documents/downloads/software/bcl2fastq/bcl2fastq2-v2-20-eula.pdf)
+  * bcl2fastq (https://support.illumina.com/sequencing/sequencing_software/bcl2fastq-conversion-software.html)
+
+Mozilla Public License (http://www.opensource.org/licenses/MPL-2.0)
+  * Eigen3: https://eigen.tuxfamily.org/
+  * certifi: https://github.com/certifi/python-certifi
+
+Python Software Foundation License (https://docs.python.org/3/license.html)
+  * isal: https://github.com/pycompression/python-isal
+  * matplotlib: https://matplotlib.org
+  * typing_extensions: https://github.com/python/typing_extensions
+  * zlib-ng: https://github.com/pycompression/python-zlib-ng
+
+Riverbank SIP License (https://github.com/Python-SIP/sip/tree/6.7.12?tab=License-1-ov-file)
+  * PyQt5-sip: https://www.riverbankcomputing.com/software/sip/
+  * sip: https://www.riverbankcomputing.com/software/sip/
+
+NOTE 1
+The BioPython license is described here: https://github.com/biopython/biopython/blob/master/LICENSE.rst
+Some BioPython components are dually covered by a BSD 3-Clause License described herein.
