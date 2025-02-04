@@ -47,23 +47,13 @@ ENV LANG="en_US.UTF-8" LANGUAGE="en_US:en" LC_ALL="en_US.UTF-8"
 
 ## Install miniforge3
 ENV ANACONDA3_VERSION=24.11.3-0 ANACONDA3_ARCH=Linux-x86_64
-ADD https://github.com/conda-forge/miniforge/releases/download/${ANACONDA3_VERSION}/Miniforge3-${ANACONDA3_VERSION}-${ANACONDA3_VERSION}.sh /Miniforge3.sh
+ADD https://github.com/conda-forge/miniforge/releases/download/${ANACONDA3_VERSION}/Miniforge3-${ANACONDA3_VERSION}-${ANACONDA3_ARCH}.sh /Miniforge3.sh
 RUN bash Miniforge3.sh -b -p "/opt/conda" \
  && bash "/opt/conda/etc/profile.d/conda.sh"
 
 # Create conda environment
 ENV CONDA_DEFAULT_ENV="drugseq-env"
 ENV PATH=$PATH:/opt/conda/bin
-RUN conda config --set channel_alias ${CONDA_ALIAS} \
- && conda config --set channel_priority true \
- && conda config --set override_channels_enabled true \
- && conda config --set add_anaconda_token false \
- && conda config --set pip_interop_enabled true \
- && conda config --set auto_activate_base false \
- && conda config --set show_channel_urls true \
- && conda config --set ssl_verify true \
- && conda config --set local_repodata_ttl 28800 \
- && conda config --set allow_non_channel_urls true \
 COPY conf/conda /opt/envs
 # shellcheck disable=SC1091
 RUN conda env create -f /opt/envs/$CONDA_DEFAULT_ENV.yml \
