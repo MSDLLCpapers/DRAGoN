@@ -17,7 +17,7 @@ import re
 from typing import Literal, TextIO
 
 import pandas as pd
-from numpy import infty
+from numpy import inf
 from scipy.special import logsumexp
 
 M_LN1BIL = 20.72326583694641  # log(10e9)
@@ -103,7 +103,7 @@ class TPMNormalizer(CountsNormalizer):
     ) -> pd.DataFrame:
         rate = (
             raw_counts.transform("log") - effective_lengths.transform("log")
-        ).fillna(-infty)
+        ).fillna(-inf)
         denom = rate.apply(logsumexp)
         return (rate - denom + M_LN1MIL).transform("exp")
 
@@ -112,7 +112,7 @@ class FPKMNormalizer(CountsNormalizer):
     def adjustment_impl(
         self, raw_counts: pd.DataFrame, effective_lengths: pd.DataFrame
     ) -> pd.DataFrame:
-        rate = raw_counts.transform("log").fillna(-infty)
+        rate = raw_counts.transform("log").fillna(-inf)
         denom = rate.apply(logsumexp)
         return (rate - denom - effective_lengths.transform("log") + M_LN1BIL).transform(
             "exp"

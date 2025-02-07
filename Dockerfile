@@ -3,12 +3,12 @@
 # syntax=docker/dockerfile-upstream:master-labs
 # hadolint global ignore=SC1091
 
-ARG FROM=amazonlinux:2023.6.20250107.0
+ARG FROM=amazonlinux:2023.6.20250128.0
 
 FROM $FROM
 
-LABEL       dock.img.name="MSDLLCPapers/DRAGoN" \
-            dock.img.description="AmazonLinux2-based image with DRAGoN pipeline" \
+LABEL       dock.img.name="scottnortonphd/msdllcpapers/dragon" \
+            dock.img.description="AmazonLinux2023-based image with DRAGoN pipeline" \
             \
             dock.maintainer.isid="nortonsc" \
             dock.maintainer.name="Scott Norton" \
@@ -18,7 +18,10 @@ LABEL       dock.img.name="MSDLLCPapers/DRAGoN" \
             \
             dock.docker.run="docker container run --rm -it  IMAGE" \
             \
-            dock.os="linux"
+            dock.os="linux" \
+            org.opencontainers.image.source="https://github.com/MSDLLCPapers/DRAGoN" \
+            org.opencontainers.image.description="AmazonLinux2023-based image with DRAGoN pipeline" \
+            org.opencontainers.image.licenses="MIT"
 
 SHELL ["/bin/bash", "-c"]
 
@@ -30,16 +33,16 @@ RUN update-ca-trust enable && update-ca-trust extract \
     sudo-1.9.15-1.p5.amzn2023.0.1 \
     curl-8.5.0-1.amzn2023.0.4 \
     wget-1.21.3-1.amzn2023.0.4 \
-    git-2.40.1-1.amzn2023.0.3 \
-    python3-pip-21.3.1-2.amzn2023.0.10 \
-    python3-openpyxl-3.0.3-3.amzn2023.0.2 \
+    git-2.47.1-1.amzn2023.0.2 \
     glibc-langpack-en-2.34-117.amzn2023.0.1 \
     gnupg2-2.3.7-1.amzn2023.0.4 \
-    R-4.1.3-1.amzn2023.0.2 \
     procps-ng-3.3.17-1.amzn2023.0.2 \
     libxcrypt-4.4.33-7.amzn2023 \
     bc-1.07.1-14.amzn2023.0.2 \
     tar-1.34-1.amzn2023.0.4 \
+    findutils-1:4.8.0-2.amzn2023.0.2 \
+    which-2.21-26.amzn2023.0.2 \
+    unzip-6.0-57.amzn2023.0.2 \
     && yum clean -y all
 #RUN rm -rf /var/cache/yum
 
