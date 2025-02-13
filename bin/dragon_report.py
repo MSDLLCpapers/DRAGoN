@@ -45,7 +45,7 @@ def load_trimming_log(filenames: list[str]):
 
     def inner(filename: str) -> pd.Series:
         ret = pd.Series(0, index=index)
-        pattern = re.compile("^(?P<key>.+):\s+(?P<count>[\d,]+)")
+        pattern = re.compile(r"^(?P<key>.+):\s+(?P<count>[\d,]+)")
         with open(filename) as fp:
             for line in fp:
                 if m := pattern.match(line):

@@ -1,0 +1,58 @@
+name: Test Pipeline
+on:
+    push:
+        branches:
+            - dev
+    pull_request:
+    release:
+        types: [published]
+
+env:
+    NXF_ANSI_LOG: false
+
+concurrency:
+    group: "${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
+    cancel-in-progress: true
+
+jobs:
+    test-ci:
+        if: "${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'msdllcpapers/dragon') }}"
+        runs-on: ubuntu-22.04
+        strategy:
+            matrix:
+                NXF_VER:
+                    - '23.10.1'
+                    - 'latest-everything'
+        steps:
+            -
+                name: Checkout
+                uses: actions/checkout@v4
+            -
+                name: Setup nextflow
+                uses: nf-core/setup-nextflow@v2
+                with:
+                    version: ${{ matrix.NXF_VER }}
+            -
+                name: Disk space cleanup
+                uses: jlumbroso/free-disk-space@v1.3.1
+            -
+                name: Run pipeline with test data
+                run: |
+                    nextflow run ${GITHUB_WORKSPACE} -profile test,docker --IO.outdir ./results
+    star-solo:
+        if: "${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'msdllcpapers/dragon') }}"
+        runs-on: ubuntu-22.04
+        steps:
+            -
+                name: Checkout
+                uses: actions/checkout@v4
+            -
+                name: Setup nextflow
+                uses: nf-core/setup-nextflow@v2
+            -
+                name: Disk space cleanup
+                uses: jlumbroso/free-disk-space@v1.3.1
+            -
+                name: Run pipeline with test data
+                run: |
+                    nextflow run ${GITHUB_WORKSPACE} -profile test,docker --IO.outdir ./results --pipeline STARsolo

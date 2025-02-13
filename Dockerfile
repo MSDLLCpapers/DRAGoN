@@ -3,12 +3,12 @@
 # syntax=docker/dockerfile-upstream:master-labs
 # hadolint global ignore=SC1091
 
-ARG FROM=amazonlinux:2023.6.20250107.0
+ARG FROM=amazonlinux:2023.6.20250128.0
 
 FROM $FROM
 
-LABEL       dock.img.name="MSDLLCPapers/DRAGoN" \
-            dock.img.description="AmazonLinux2-based image with DRAGoN pipeline" \
+LABEL       dock.img.name="scottnortonphd/msdllcpapers/dragon" \
+            dock.img.description="AmazonLinux2023-based image with DRAGoN pipeline" \
             \
             dock.maintainer.isid="nortonsc" \
             dock.maintainer.name="Scott Norton" \
@@ -18,7 +18,10 @@ LABEL       dock.img.name="MSDLLCPapers/DRAGoN" \
             \
             dock.docker.run="docker container run --rm -it  IMAGE" \
             \
-            dock.os="linux"
+            dock.os="linux" \
+            org.opencontainers.image.source="https://github.com/MSDLLCPapers/DRAGoN" \
+            org.opencontainers.image.description="AmazonLinux2023-based image with DRAGoN pipeline" \
+            org.opencontainers.image.licenses="MIT"
 
 SHELL ["/bin/bash", "-c"]
 
@@ -30,16 +33,16 @@ RUN update-ca-trust enable && update-ca-trust extract \
     sudo-1.9.15-1.p5.amzn2023.0.1 \
     curl-8.5.0-1.amzn2023.0.4 \
     wget-1.21.3-1.amzn2023.0.4 \
-    git-2.40.1-1.amzn2023.0.3 \
-    python3-pip-21.3.1-2.amzn2023.0.10 \
-    python3-openpyxl-3.0.3-3.amzn2023.0.2 \
+    git-2.47.1-1.amzn2023.0.2 \
     glibc-langpack-en-2.34-117.amzn2023.0.1 \
     gnupg2-2.3.7-1.amzn2023.0.4 \
-    R-4.1.3-1.amzn2023.0.2 \
     procps-ng-3.3.17-1.amzn2023.0.2 \
     libxcrypt-4.4.33-7.amzn2023 \
     bc-1.07.1-14.amzn2023.0.2 \
     tar-1.34-1.amzn2023.0.4 \
+    findutils-1:4.8.0-2.amzn2023.0.2 \
+    which-2.21-26.amzn2023.0.2 \
+    unzip-6.0-57.amzn2023.0.2 \
     && yum clean -y all
 #RUN rm -rf /var/cache/yum
 
@@ -47,23 +50,13 @@ ENV LANG="en_US.UTF-8" LANGUAGE="en_US:en" LC_ALL="en_US.UTF-8"
 
 ## Install miniforge3
 ENV ANACONDA3_VERSION=24.11.3-0 ANACONDA3_ARCH=Linux-x86_64
-ADD https://github.com/conda-forge/miniforge/releases/download/${ANACONDA3_VERSION}/Miniforge3-${ANACONDA3_VERSION}-${ANACONDA3_VERSION}.sh /Miniforge3.sh
+ADD https://github.com/conda-forge/miniforge/releases/download/${ANACONDA3_VERSION}/Miniforge3-${ANACONDA3_VERSION}-${ANACONDA3_ARCH}.sh /Miniforge3.sh
 RUN bash Miniforge3.sh -b -p "/opt/conda" \
  && bash "/opt/conda/etc/profile.d/conda.sh"
 
 # Create conda environment
 ENV CONDA_DEFAULT_ENV="drugseq-env"
 ENV PATH=$PATH:/opt/conda/bin
-RUN conda config --set channel_alias ${CONDA_ALIAS} \
- && conda config --set channel_priority true \
- && conda config --set override_channels_enabled true \
- && conda config --set add_anaconda_token false \
- && conda config --set pip_interop_enabled true \
- && conda config --set auto_activate_base false \
- && conda config --set show_channel_urls true \
- && conda config --set ssl_verify true \
- && conda config --set local_repodata_ttl 28800 \
- && conda config --set allow_non_channel_urls true \
 COPY conf/conda /opt/envs
 # shellcheck disable=SC1091
 RUN conda env create -f /opt/envs/$CONDA_DEFAULT_ENV.yml \
