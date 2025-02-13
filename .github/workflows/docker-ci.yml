@@ -29,4 +29,4 @@ jobs:
                 uses: docker/build-push-action@v6
                 with:
                     push: true
-                    tags: scottnortonphd/msdllcpapers/dragon:latest,scottnortonphd/msdllcpapers/dragon:${GITHUB_SHA}-${{ github.run_number }}
+                    tags: scottnortonphd/msdllcpapers/dragon:latest,scottnortonphd/msdllcpapers/dragon:${{ github.sha }}-${{ github.run_number }}
