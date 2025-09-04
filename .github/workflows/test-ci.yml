@@ -22,7 +22,7 @@ jobs:
             matrix:
                 NXF_VER:
                     - '23.10.1'
-                    - 'latest-everything'
+                    - 'latest-stable'
         steps:
             -
                 name: Checkout
@@ -49,6 +49,8 @@ jobs:
             -
                 name: Setup nextflow
                 uses: nf-core/setup-nextflow@v2
+                with:
+                    version: '23.10.1'
             -
                 name: Disk space cleanup
                 uses: jlumbroso/free-disk-space@v1.3.1

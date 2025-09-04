@@ -9,19 +9,19 @@
 // This source code is licensed under the MIT License found in the
 // LICENSE file in the root directory of this source tree.
 
-include {main_DRAGoN} from "./workflows/DRAGoN.nf"
-include {main_STARsolo} from "./workflows/STARsolo.nf"
+include { main_DRAGoN   } from "./workflows/DRAGoN.nf"
+include { main_STARsolo } from "./workflows/STARsolo.nf"
 
 workflow {
-    genome = params.private.GENOME_PATHS.get(params.IO.reference) ?: [:]
+    genome = params.genomes.get(params.IO.reference) ?: [:]
     genome.fasta = params.IO.fasta ?: genome.fasta
     genome.gtf = params.IO.gtf ?: genome.gtf
     genome.star = params.IO.star ?: genome.star
-    genome.star_version = params.private.versionGenome
+    genome.star_version = params.Align.versionGenome
     ambiguous = (params.Dedup.ambiguous.split(",") + "Unique").toUnique().join(" ")
 
     if (params.pipeline == 'DRAGoN') {
-        main_DRAGoN (
+        main_DRAGoN(
             params,
             genome,
             params.IO.fastqdir,
@@ -42,8 +42,9 @@ workflow {
             ambiguous,
             params.Count.adjust_effective_lengths,
         )
-    } else if (params.pipeline == 'STARsolo') {
-        main_STARsolo (
+    }
+    else if (params.pipeline == 'STARsolo') {
+        main_STARsolo(
             params,
             genome,
             params.IO.fastqdir,
@@ -62,11 +63,74 @@ workflow {
             ambiguous,
             params.Count.adjust_effective_lengths,
         )
-    } else {
+    }
+    else {
         def validPipelines = [
             'DRAGoN',
-            'STARsolo'
+            'STARsolo',
         ]
-        error "Invalid pipeline passed: --pipeline ${params.pipeline}\nChoose from: ${validPipelines.join(", ")}"
+        error("Invalid pipeline passed: --pipeline ${params.pipeline}\nChoose from: ${validPipelines.join(", ")}")
+    }
+
+    def myParams
+    def myWorkflow
+
+    myParams = params
+    myWorkflow = workflow
+
+    workflow.onComplete {
+        def emails = myParams.notifyEmails
+        if (emails instanceof List) {
+            emails = emails.join(",")
+        }
+        if (emails != '') {
+            log.info("Sending out emails to notify: ${emails}")
+            def msg
+            if (myWorkflow.success) {
+                msg = """\
+                    ${myParams.pipeline} ${myWorkflow.sessionId} completed.
+                    ---------------------------
+                    Parameters:
+                    ---------------------------
+                    IO.metadata: ${myParams.IO.metadata}
+                    IO.fastqdir: ${myParams.IO.fastqdir}
+                    IO.outdir: ${myParams.IO.outdir}
+                    ---------------------------
+                    Completed at: ${myWorkflow.complete}
+                    Duration    : ${myWorkflow.duration}
+                    Success     : ${myWorkflow.success}
+                    workDir     : ${myWorkflow.workDir}
+                    exit status : ${myWorkflow.exitStatus}
+                    """.stripIndent()
+            }
+            else {
+                msg = """\
+                    ${myParams.pipeline} ${myWorkflow.sessionId} failed:
+                    ---------------------------
+                    Parameters:
+                    ---------------------------
+                    IO.metadata: ${myParams.IO.metadata}
+                    IO.fastqdir: ${myParams.IO.fastqdir}
+                    IO.outdir: ${myParams.IO.outdir}
+                    Launch directory: ${myWorkflow.launchDir}
+                    The launch directory contains full log file (.nextflow.log) and the HTML report of the run, which could be useful for troubleshooting.
+                    ---------------------------
+                    Completed at: ${myWorkflow.complete}
+                    Duration    : ${myWorkflow.duration}
+                    Success     : ${myWorkflow.success}
+                    workDir     : ${myWorkflow.workDir}
+                    exit status : ${myWorkflow.exitStatus}
+                    ---------------------------
+                    Error report:
+                    ---------------------------
+                    ${myWorkflow.errorReport}
+                    """.stripIndent()
+            }
+            sendMail(
+                to: emails,
+                subject: "DRUG-seq (using ${myParams.pipeline}): ${myWorkflow.sessionId}",
+                body: msg,
+            )
+        }
     }
 }

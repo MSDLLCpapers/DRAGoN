@@ -38,7 +38,7 @@ This project is written primarily in three languages: Python, C++, and Nextflow 
 
 ## CI/CD
 
-This project uses GitHub for fine-grained version control. The main branch is `master`, and this has branch protections preventing direct push. Thus any change made to the pipeline should be made in a separate branch, and work logged in a JIRA ticket. The branch name convention is `feature/<ticket>` or `bugfix/<ticket>`.
+This project uses GitHub for fine-grained version control. The main branch is `main`, and this has branch protections preventing direct push. Thus any change made to the pipeline should be made in a separate branch, and work logged in a JIRA ticket. The branch name convention is `feature/<ticket>` or `bugfix/<ticket>`.
 
 All contributors should verify that their changes satisfy the following checks:
 

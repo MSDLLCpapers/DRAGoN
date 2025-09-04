@@ -1,4 +1,3 @@
-
 // Copyright © 2025 Merck & Co., Inc., Rahway, NJ, USA and its affiliates. All rights reserved.
 // This file is part of DRAGoN.
 //
@@ -9,23 +8,30 @@
 process STAR_ALIGN {
     label 'process_high'
     label 'process_high_memory'
+    conda "${moduleDir}/environment.yml"
+    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
+        ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/26/268b4c9c6cbf8fa6606c9b7fd4fafce18bf2c931d1a809a0ce51b105ec06c89d/data'
+        : 'community.wave.seqera.io/library/htslib_samtools_star_gawk:ae438e9a604351a4'}"
+
     input:
-        tuple val(meta), path(unmapSam, name: "input?/*", arity: '1..*'), path(barcodes)
-        path idx, name: 'idx/*'
-        path annofile
-        val isSolo
+    tuple val(meta), path(unmapSam, name: "input?/*", arity: '1..*'), path(barcodes)
+    path idx, name: 'idx/*'
+    path annofile
+    val isSolo
+
     output:
-        tuple val(meta), path("*Aligned.out.bam"), path(barcodes), optional:true, emit: bam
-        tuple val(meta), path("*Aligned.sortedByCoord.out.bam"), optional:true, emit: bam_sorted
-        tuple val(meta), path("*Solo.out"), path(barcodes), optional:true, emit: solo
-        tuple val(meta), path("*Unmapped.out.bam"), optional:true, emit: unmapped
-        tuple val(meta), path("*Log.final.out"), emit: log
-        path 'versions.yml', emit: versions
+    tuple val(meta), path("*Aligned.out.bam"), path(barcodes), optional: true, emit: bam
+    tuple val(meta), path("*Aligned.sortedByCoord.out.bam"), optional: true, emit: bam_sorted
+    tuple val(meta), path("*Solo.out"), path(barcodes), optional: true, emit: solo
+    tuple val(meta), path("*Unmapped.out.bam"), optional: true, emit: unmapped
+    tuple val(meta), path("*Log.final.out"), emit: log
+    path 'versions.yml', emit: versions
+
     script:
-        prefix = task.ext.prefix ?: "${meta.id}.${meta.bcidx}"
-        args = task.ext.args ?: ''
-        gtfFileArg = annofile ? "--sjdbGTFfile $annofile" : ""
-"""
+    prefix = task.ext.prefix ?: "${meta.id}.${meta.bcidx}"
+    args = task.ext.args ?: ''
+    gtfFileArg = annofile ? "--sjdbGTFfile ${annofile}" : ""
+    """
 if [ ${unmapSam.size()} -eq 1 ]; then
     ln -s ${unmapSam} ${prefix}.in.bam
 else
@@ -50,9 +56,10 @@ cat <<-END_VERSIONS > versions.yml
     gawk: \$(echo \$(gawk --version 2>&1) | sed 's/^.*GNU Awk //; s/, .*\$//')
 END_VERSIONS
 """
+
     stub:
-        prefix = task.ext.prefix ?: "${meta.id}.${meta.bcidx}"
-"""
+    prefix = task.ext.prefix ?: "${meta.id}.${meta.bcidx}"
+    """
 touch ${prefix}_Aligned.out.bam
 touch ${prefix}_Aligned.sortedByCoord.out.bam
 touch ${prefix}_Log.final.out

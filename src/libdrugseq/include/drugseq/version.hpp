@@ -5,7 +5,7 @@
 #define DRUGSEQ_VERSION_H
 
 #ifndef DRUGSEQ_VERSION_STR
-#define DRUGSEQ_VERSION_STR "1.4.0"
+#define DRUGSEQ_VERSION_STR "1.7.0"
 #endif
 
 #endif //DRUGSEQ_VERSION_H

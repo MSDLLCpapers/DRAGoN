@@ -1,0 +1,16 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - conda-forge::cmake=3.29.2
+  - conda-forge::make=4.4.1
+  - bioconda::kseqpp=1.1.2
+  - conda-forge::eigen=3.2=3
+  - conda-forge::gcc=13.2.0
+  - conda-forge::gxx=13.2.0
+  - conda-forge::binutils=2.40
+  - conda-forge::nlohmann_json=3.11.3
+  - conda-forge::boost-cpp=1.84.0
+  - bioconda::bamtools=2.5.2
+  - conda-forge::pkg-config=0.29.2
+  - conda-forge::zlib=1.2.13=hd590300_5

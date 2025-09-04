@@ -19,9 +19,17 @@ The computational pipeline consists of several steps: aligning the R2 reads to a
 
 This repository presents two alternative pipelines implemented in nextflow. The first, `STARsolo.nf`, wraps STAR running in Solo mode [[5](#references)] to provide a rough estimate of UMI counts. The second is `DRAGoN.nf`, a novel proprietary pipeline called **D**RUG-seq/**R**NA-seq **A**nalysis of **G**enetically-perturbed cells **o**n **N**extflow (**DRAGoN**), employs a more robust duplicate removal algorithm. Both of these pipelines leverage Nextflow's efficient resource distribution to accelerate processing while keeping memory usage in check.
 
+<br><br>
+
 <a name="quick"></a>
 
 ## Quick start
+
+First, install nextflow: `wget -O - https://get.nextflow.io | bash`.
+
+Next, clone this repository: `git clone https://MSDLLCPapers/DRAGoN`
+
+To invoke: `./nextflow run ./DRAGoN [--PARAM VALUE ...|-params-file PARAMS.yml]`
 
 ### If your data are on S3...
 
@@ -51,6 +59,7 @@ Replace `my_aws_profile` above with the actual name of your profile as defined i
 First, install git and whichever engine you wish to use to run processes (anaconda, singularity, docker). Then install nextflow 23.10.1 (or later) from https://get.nextflow.io. Finally submit your job using an appropriate `nextflow run` command for your system. If you have your own local cluster, you may need to configure nextflow to use it yourself. You will also need to specify full paths to reference datasets at runtime.
 
 If you want to run this workflow using the conda profile, you will need to compile the binary tools yourself. See [CONTRIBUTING.md](CONTRIBUTING.md) for instructions.
+
 ## Configuration profiles
 
 This pipeline supports singularity, docker, and conda executors via the `-profile` argument. Additional executors can be enabled by supplying a custom config.
@@ -77,8 +86,8 @@ Typical pipeline command:
   nextflow run DRAGoN -profile <docker/singularity/.../institute> --IO.metadata metadata.xlsx --IO.fastqdir s3://bucket/path/to/fastq/folder/ --IO.outdir <OUTDIR>
 
 --help                                [boolean, string] Show the help message for all top level parameters. When a parameter is given to `--help`, the full help message of that parameter will be printed.
---helpFull                            [boolean]         Show the help message for all non-hidden parameters.
---showHidden                          [boolean]         Show all hidden parameters in the help message. This needs to be used in combination with `--help` or `--helpFull`.
+--help_full                           [boolean]         Show the help message for all non-hidden parameters.
+--showHidden                          [boolean]         Show all hidden parameters in the help message. This needs to be used in combination with `--help` or `--help_full`.
 
 Input/Output options
   --IO.fastqdir                       [string]  Path containing fastq files. Can be an empty or nonexistent directory, in which case these will be generated.
@@ -115,7 +124,8 @@ Options for QC and well demultiplexing
 raise (default): Aborts the pipeline on error
 warn: Emits a warning to stderr
 ignore: Don't run heuristics  (accepted: ignore, warn, raise) [default: raise]
-  --Demux.downsample_to               [string]  Determine the threshold number of QC-pass reads above which a well will be downsampled. If a decimal between 0 and 1, the threshold is that fraction of the total QC-pass reads in the experiment. If no value is provided, the threshold will be determined adaptively as the lower of 15% of the total number of reads in the experiment, or the expression `floor(pct75+1.75*IQR)`, where pct75 is the 75th percentile of reads assigned to wells and IQR is the difference between the 25th and 75th percentiles. Default: no downsampling.
+  --Demux.downsample_to               [string]  Determine the threshold number of QC-pass reads above which a well will be downsampled. If a decimal between 0 and 1, the threshold is that fraction of the total QC-pass reads in the experiment. If no value is provided, the threshold will be determined adaptively as the lower of 15% of the total number of reads in the experiment, or the expression `floor(pct75+1.75*IQR)`, where pct75 is the 75th
+percentile of reads assigned to wells and IQR is the difference between the 25th and 75th percentiles. Default: no downsampling.
   --Demux.downsample_threshold        [string]  Downsample wells to a maximum of N reads. If a decimal between 0 and 1, will downsample to that fraction regardless of original size. If not provided, will choose the threshold given by --Demux.downsample_threshold. Default: no downsampling.
   --Demux.downsample_seed             [integer] Set a seed for the downsampling logic, for the sake of reproducibility. Default: random seed
   --Demux.plate_layout_xoff           [integer]
@@ -145,11 +155,12 @@ Options for duplicate detection
   --Dedup.umi_mismatch                [integer] Maximum edit distance between two UMIs to consider them duplicates. [default: 2]
   --Dedup.umiDist                     [integer] Search for duplicates within a sliding genomic window of this many bases. [default: 10]
   --Dedup.ambiguous                   [string]  Comma-separated list of strategies for handling multimapping reads. Accepted values are:
-                                                  Unique: Only count reads assigned to a single gene.
-                                                  Uniform: Distribute each multimapping read's count uniformly across all genes they map to.
-                                                  PropUnique: Attempt to distribute multimapping reads proportional to the number of reads mapping uniquely to each gene. Falls back on Uniform.
-                                                  EM: Computes the maximum likelihood distribution of multimapping reads using an expectation-maximization algorithm.
-                                                  Rescue: Equivalent to running a single iteration of EM. [default: Unique]
+Unique: Only count reads assigned to a single gene.
+Uniform: Distribute each multimapping read's count uniformly across all genes they map to.
+PropUnique: Attempt to distribute multimapping reads proportional to the number of reads mapping uniquely to each gene. Falls back on Uniform.
+EM: Computes the maximum
+likelihood distribution of multimapping reads using an expectation-maximization algorithm.
+Rescue: Equivalent to running a single iteration of EM. [default: Unique]
   --Dedup.em_iter_max                 [integer] DRAGoN only: If --Dedup.ambiguous contains EM, the maximum number of iterations of EM [default: 100]
   --Dedup.em_max_diff                 [number]  DRAGoN only: If --Dedup.ambiguous contains EM, the tolerance for convergence, measured by the largest absolute change in counts for any gene in the current well [default: 0.01]
   --Dedup.em_small_thresh             [number]  DRAGoN only: If --Dedup.ambiguous contains EM, clamp counts smaller than this to 0 [default: 0.01]
@@ -158,6 +169,8 @@ Options for duplicate detection
 uncategorized_options
   --private.versionGenome             [string]  [default: 2.7.4a]
   --private.overhang                  [integer] [default: 89]
+  --private.count_refs_dir            [string]
+  --private.star_refs_dir             [string]
   --awsbatch_queue                    [string]  awsbatch queue to submit jobs to
   --awsbatch_jobrole                  [string]  IAM role to use for awsbatch worker instances
   --errorStrategy                     [string]  If a worker hits an error after two attempts, the workflow should either

@@ -4,6 +4,11 @@ on:
         branches:
             - main
     workflow_dispatch:
+        inputs:
+            custom-tag:
+                type: string
+                description: Custom image tag
+                default: latest
 jobs:
     docker-build:
         runs-on: ubuntu-22.04
@@ -29,4 +34,4 @@ jobs:
                 uses: docker/build-push-action@v6
                 with:
                     push: true
-                    tags: scottnortonphd/msdllcpapers/dragon:latest,scottnortonphd/msdllcpapers/dragon:${{ github.sha }}-${{ github.run_number }}
+                    tags: scottnortonphd/msdllcpapers/dragon:${{ github.event_name == 'workflow_dispatch' && inputs.custom-tag || 'latest' }},scottnortonphd/msdllcpapers/dragon:${{ github.sha }}-${{ github.run_number }}

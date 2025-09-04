@@ -1,0 +1,7 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - conda-forge::pandas=2.2.3
+  - conda-forge::pyarrow=18.0.0
+  - conda-forge::scipy=1.14.1
