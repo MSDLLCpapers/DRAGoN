@@ -10,7 +10,7 @@ process PIGZ {
     container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
         ? 'https://depot.galaxyproject.org/singularity/pigz:2.8'
         : 'biocontainers/pigz:2.8'}"
-    stageInMode 'link'  // hard link instead of soft, for pigz requirements
+    stageInMode 'copy'  // copy instead of symlink, for pigz requirements
 
     input:
     tuple val(meta), path(file_in)
