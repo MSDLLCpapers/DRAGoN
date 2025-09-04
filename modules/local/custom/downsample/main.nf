@@ -8,8 +8,8 @@ process DownsampleBAM {
     label 'process_single'
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
-        ? 'https://depot.galaxyproject.org/singularity/mulled-v2-1a35167f7a491c7086c13835aaa74b39f1f43979:951e914d3ad608df43a6513769e60ae8de57d13e-0'
-        : 'biocontainers/mulled-v2-1a35167f7a491c7086c13835aaa74b39f1f43979:951e914d3ad608df43a6513769e60ae8de57d13e-0'}"
+        ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/fe/fe10100bc5f866b411cbeaf4f6d2c425f75ecc48c1784b8384705d822c505d22/data'
+        : 'community.wave.seqera.io/library/samtools_jq_pandas:08a25dd0fa207f00'}"
 
     input:
     tuple val(meta), path(mergedbam), path(barcodes), path(demux_log)
@@ -36,6 +36,7 @@ cat <<-END_VERSIONS > versions.yml
 "${task.process}":
     samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
     python: \$(python --version | sed -e "s/Python //g")
+    jq: \$(jq --version | cut -d'-' -f2)
 END_VERSIONS
 """
 
@@ -61,8 +62,7 @@ cat <<-END_VERSIONS > versions.yml
 "${task.process}":
     samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
     python: \$(python --version | sed -e "s/Python //g")
-    numpy: \$(python -c 'import numpy; print(numpy.__version__)')
-    pandas: \$(python -c 'import pandas; print(pandas.__version__)')
+    jq: \$(jq --version | cut -d'-' -f2)
 END_VERSIONS
 """
 }
