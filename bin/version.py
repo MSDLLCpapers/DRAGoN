@@ -8,7 +8,7 @@ LICENSE file in the root directory of this source tree.
 
 import os
 
-__version__ = "2025-01-03"
+__version__ = "1.7.0"
 try:
     with open(f"{os.path.dirname(__file__)}/.commit") as fp:
         __version__ = fp.read().strip() or __version__

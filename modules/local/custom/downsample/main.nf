@@ -1,4 +1,3 @@
-
 // Copyright © 2025 Merck & Co., Inc., Rahway, NJ, USA and its affiliates. All rights reserved.
 // This file is part of DRAGoN.
 //
@@ -7,17 +6,24 @@
 
 process DownsampleBAM {
     label 'process_single'
+    conda "${moduleDir}/environment.yml"
+    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/mulled-v2-1a35167f7a491c7086c13835aaa74b39f1f43979:951e914d3ad608df43a6513769e60ae8de57d13e-0'
+        : 'biocontainers/mulled-v2-1a35167f7a491c7086c13835aaa74b39f1f43979:951e914d3ad608df43a6513769e60ae8de57d13e-0'}"
+
     input:
-        tuple val(meta), path(mergedbam), path(barcodes), path(demux_log)
+    tuple val(meta), path(mergedbam), path(barcodes), path(demux_log)
+
     output:
-        tuple val(meta), path("*_unmap.bam"), path(barcodes), optional: true, emit: bam
-        tuple val(meta), path("${prefix}.downsample.txt"), emit: report
-        tuple val(meta), path("*_discard.bam"), optional: true, emit: discard
-        path 'versions.yml', emit: versions
+    tuple val(meta), path("*_unmap.bam"), path(barcodes), optional: true, emit: bam
+    tuple val(meta), path("${prefix}.downsample.txt"), emit: report
+    tuple val(meta), path("*_discard.bam"), optional: true, emit: discard
+    path 'versions.yml', emit: versions
+
     script:
-        prefix = task.ext.prefix ?: meta.id
-        args = task.ext.args ?: ''
-"""
+    prefix = task.ext.prefix ?: meta.id
+    args = task.ext.args ?: ''
+    """
 downsample_bam.sh \\
     -i ${mergedbam} \\
     -b ${barcodes} \\
@@ -30,13 +36,12 @@ cat <<-END_VERSIONS > versions.yml
 "${task.process}":
     samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
     python: \$(python --version | sed -e "s/Python //g")
-    numpy: \$(python -c 'import numpy; print(numpy.__version__)')
-    pandas: \$(python -c 'import pandas; print(pandas.__version__)')
 END_VERSIONS
 """
+
     stub:
-        prefix = task.ext.prefix ?: meta.id
-"""
+    prefix = task.ext.prefix ?: meta.id
+    """
 touch ${prefix}_unmap.bam
 touch ${prefix}_discard.bam
 if [ "${meta.bcidx}" != "noBC" ]; then

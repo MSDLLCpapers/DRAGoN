@@ -3,6 +3,12 @@
 
 ## Quick start
 
+First, install nextflow: `wget -O - https://get.nextflow.io | bash`.
+
+Next, clone this repository: `git clone https://MSDLLCPapers/DRAGoN`
+
+To invoke: `./nextflow run ./DRAGoN [--PARAM VALUE ...|-params-file PARAMS.yml]`
+
 ### If your data are on S3...
 
 You will need to explicitly tell nextflow which credentials to use. The recommendation is to use the following procedure:

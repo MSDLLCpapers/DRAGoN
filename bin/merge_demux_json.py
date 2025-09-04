@@ -29,7 +29,12 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn
-from adjustText import adjust_text
+
+try:
+    from adjustText import adjust_text
+except ImportError:
+    adjust_text = None
+
 
 UNMATCHED_REFRESH_FREQUENCY = 1 / 60
 
@@ -532,10 +537,11 @@ class CLI(argparse.Namespace):
                     ),
                     axis=1,
                 )
-                adjust_text(
-                    texts.to_list(),
-                    arrowprops={"arrowstyle": "-", "color": "black", "lw": 0.5},
-                )
+                if adjust_text is not None:
+                    adjust_text(
+                        texts.to_list(),
+                        arrowprops={"arrowstyle": "-", "color": "black", "lw": 0.5},
+                    )
             ax.set_title("Reads per well")
             ax.tick_params(labelsize=18)
             ax.ticklabel_format(style="plain", axis="y")

@@ -40,7 +40,6 @@ BSD License (http://www.opensource.org/licenses/BSD-3-Clause)
   * Jinja2: https://palletsprojects.com/p/jinja/
   * Markdown: https://Python-Markdown.github.io/
   * MarkupSafe: https://palletsprojects.com/p/markupsafe/
-  * Miniforge3: https://github.com/conda-forge/miniforge
   * Pygments: https://pygments.org
   * click: https://palletsprojects.com/p/click/
   * colormath: https://github.com/gtaylor/python-colormath
@@ -105,9 +104,6 @@ MIT License (https://opensource.org/license/mit)
   * urllib3: https://urllib3.readthedocs.io/
   * xopen: https://github.com/pycompression/xopen/
   * zipp: https://github.com/jaraco/zipp
-
-Illumina bcl2fastq2 EULA (https://support.illumina.com/content/dam/illumina-support/documents/downloads/software/bcl2fastq/bcl2fastq2-v2-20-eula.pdf)
-  * bcl2fastq (https://support.illumina.com/sequencing/sequencing_software/bcl2fastq-conversion-software.html)
 
 Mozilla Public License (http://www.opensource.org/licenses/MPL-2.0)
   * Eigen3: https://eigen.tuxfamily.org/

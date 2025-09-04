@@ -1,4 +1,3 @@
-
 // Copyright © 2025 Merck & Co., Inc., Rahway, NJ, USA and its affiliates. All rights reserved.
 // This file is part of DRAGoN.
 //
@@ -7,32 +6,40 @@
 
 process SAMTOOLS_SORT {
     label 'process_medium'
+    conda "${moduleDir}/environment.yml"
+    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/samtools:1.20--h50ea8bc_0'
+        : 'biocontainers/samtools:1.20--h50ea8bc_0'}"
+
     input:
-        tuple val(meta), path(bam), path(barcodes)
+    tuple val(meta), path(bam), path(barcodes)
+
     output:
-        tuple val(meta), path("${prefix}.bam"), path(barcodes), emit: bam
-        path 'versions.yml', emit: versions
+    tuple val(meta), path("${prefix}.bam"), path(barcodes), emit: bam
+    path 'versions.yml', emit: versions
+
     script:
-        prefix = task.ext.prefix ?: "${meta.id}.${meta.bcidx}"
-        args = task.ext.args ?: ''
-        if (bam.baseName == prefix) {
-            error "output file will have the same name as the input"
-        }
-"""
+    prefix = task.ext.prefix ?: "${meta.id}.${meta.bcidx}"
+    args = task.ext.args ?: ''
+    if (bam.baseName == prefix) {
+        error("output file will have the same name as the input")
+    }
+    """
 samtools \\
     sort \\
     -@ ${task.cpus} \\
-    $args \\
+    ${args} \\
     -o ${prefix}.bam \\
-    $bam
+    ${bam}
 cat <<-END_VERSIONS > versions.yml
 "${task.process}":
     samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
 END_VERSIONS
 """
+
     stub:
-        prefix = task.ext.prefix ?: "${meta.id}.${meta.bcidx}"
-"""
+    prefix = task.ext.prefix ?: "${meta.id}.${meta.bcidx}"
+    """
 touch ${prefix}.bam
 cat <<-END_VERSIONS > versions.yml
 "${task.process}":

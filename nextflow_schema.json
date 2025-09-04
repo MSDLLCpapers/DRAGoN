@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/MSDLLCPapers/DRAGoN/master/nextflow_schema.json",
+    "$id": "https://raw.githubusercontent.com/MSDLLCPapers/DRAGoN/main/nextflow_schema.json",
     "title": "MSDLLCPapers/DRAGoN pipeline parameters",
     "description": "DRAGoN workflow",
     "type": "object",
@@ -315,6 +315,16 @@
                             "description": "Amount of memory to reserve per CPU when running alignment processes. Interpreted as a number of bytes, or you can add a memory suffix e.g. 8GB. (def. 20GB; recommend increasing it for larger genomes)",
                             "pattern": "^[0-9]+( ?[kMG]?B?)?$",
                             "default": "64GB"
+                        },
+                        "versionGenome": {
+                            "type": "string",
+                            "hidden": true,
+                            "default": "2.7.4a"
+                        },
+                        "sjdbOverhang": {
+                            "type": "integer",
+                            "hidden": true,
+                            "default": 89
                         }
                     }
                 }
@@ -406,21 +416,6 @@
         "uncategorized_options": {
             "type": "object",
             "properties": {
-                "private": {
-                    "type": "object",
-                    "properties": {
-                        "versionGenome": {
-                            "type": "string",
-                            "hidden": true,
-                            "default": "2.7.4a"
-                        },
-                        "overhang": {
-                            "type": "integer",
-                            "hidden": true,
-                            "default": 89
-                        }
-                    }
-                },
                 "igenomes_base": {
                     "type": "string",
                     "format": "directory-path",
@@ -498,11 +493,6 @@
                     "type": "string",
                     "hidden": true,
                     "default": "quay.io"
-                },
-                "docker_container": {
-                    "type": "string",
-                    "hidden": true,
-                    "default": "MSDLLCPapers/DRAGoN:1.6.1"
                 },
                 "in_nf_test": {
                     "type": "boolean",
